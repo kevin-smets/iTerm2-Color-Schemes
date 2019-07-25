@@ -21,7 +21,6 @@ if ENV.has_key? 'TMUX'
 end
 
 preview = files.length > 1
-history = []
 until files.empty?
   file = files.shift
   print "[#{File.basename file, '.*'}] " if preview
@@ -60,14 +59,7 @@ until files.empty?
         'cursor text'   => 'm',
       }.fetch(type, '%x' % type.to_i) << rgb << "\e\\"
     end
-    case IO.console.getch.ord
-    when 127   # backspace
-      files.unshift *[history.pop, file].compact
-    when 3, 27 # ctrl-c, esc
-      break
-    else
-      history << file
-    end
+    break if files.empty? || [3.chr, "\e"].include?(IO.console.getch)
   rescue Exception
     print '(X) '
   end
